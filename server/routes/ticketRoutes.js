@@ -10,9 +10,10 @@ const {
 
 const { protect } = require("../middleware/authMiddleware");
 const { isAdmin } = require("../middleware/roleMiddleware");
+const upload = require("../middleware/uploadMiddleware");
 
 // Tenant
-router.post("/", protect, createTicket);
+router.post("/", protect, upload.single("image"), createTicket);
 router.get("/my", protect, getMyTickets);
 
 // Admin

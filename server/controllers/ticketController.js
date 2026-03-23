@@ -5,9 +5,12 @@ exports.createTicket = async (req, res) => {
   try {
     const { title, description } = req.body;
 
+    const image_url = req.file ? req.file.path : null;
+
     const ticket = await Ticket.create({
       title,
       description,
+      image_url,
       tenant: req.user._id,
     });
 
