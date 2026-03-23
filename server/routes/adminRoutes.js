@@ -5,7 +5,7 @@ const { createTenant } = require("../controllers/adminController");
 const { protect } = require("../middleware/authMiddleWare");
 const { isAdmin } = require("../middleware/roleMiddleWare");
 
-// Only admin can create tenants
+// Protected + Admin only
 router.post("/create-tenant", protect, isAdmin, createTenant);
 
 module.exports = router;
