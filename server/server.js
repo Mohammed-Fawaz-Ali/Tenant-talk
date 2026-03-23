@@ -23,7 +23,7 @@ connectDB();
 // Middleware
 app.use(
   cors({
-    origin: "https://tenant-talk-five.vercel.app/", // change to frontend URL after deploy
+    origin: "https://tenant-talk-five.vercel.app", // change to frontend URL after deploy
   })
 );
 
