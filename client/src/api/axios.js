@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "https://tenant-talk-7aa9.onrender.com/",
+  baseURL: "https://tenant-talk-7aa9.onrender.com/api",
 });
 
 // Attach token automatically
