@@ -1,22 +1,34 @@
 const Ticket = require("../models/Ticket");
 
 // CREATE TICKET (Tenant)
-exports.createTicket = async (req, res) => {
+exports.createTicket = async (req, res, next) => {
   try {
+    if (!req.user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
     const { title, description } = req.body;
 
-    const image_url = req.file ? req.file.path : null;
+    if (!title || !title.trim()) {
+      return res.status(400).json({ message: "Title is required" });
+    }
+
+    const image_url = req.file?.path ?? null;
 
     const ticket = await Ticket.create({
-      title,
-      description,
+      title: title.trim(),
+      description: description?.trim() ?? "",
       image_url,
       tenant: req.user._id,
     });
 
     res.status(201).json(ticket);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    if (error.name === "ValidationError") {
+      return res.status(400).json({ message: error.message });
+    }
+    console.error("createTicket error", error);
+    next(error);
   }
 };
 

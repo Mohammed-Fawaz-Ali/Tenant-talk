@@ -30,6 +30,15 @@ const userSchema = new mongoose.Schema(
     phone: {
       type: String,
     },
+
+    age: {
+      type: Number,
+    },
+
+    people_living: {
+      type: Number,
+      default: 1,
+    },
   },
   { timestamps: true }
 );

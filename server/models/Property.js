@@ -11,6 +11,14 @@ const propertySchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    people_living: {
+      type: Number,
+      default: 1,
+    },
+    tenant_age: {
+      type: Number,
+      default: null,
+    },
     tenant: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
