@@ -1,4 +1,10 @@
 const Ticket = require("../models/Ticket");
+const User = require("../models/User");
+const Notification = require("../models/Notification");
+
+async function addNotification({ userId, message, type = "ticket" }) {
+  return Notification.create({ user: userId, message, type });
+}
 
 // CREATE TICKET (Tenant)
 exports.createTicket = async (req, res, next) => {
@@ -21,6 +27,20 @@ exports.createTicket = async (req, res, next) => {
       image_url,
       tenant: req.user._id,
     });
+
+    // Notify admin(s)
+    const tenant = await User.findById(req.user._id);
+    const tenantLabel = tenant?.username || tenant?.name || "Tenant";
+
+    const admins = await User.find({ role: "admin" });
+    const notifications = admins.map((admin) => ({
+      user: admin._id,
+      message: `New ticket created by ${tenantLabel}: ${ticket.title}`,
+      type: "ticket",
+    }));
+    if (notifications.length > 0) {
+      await Notification.insertMany(notifications);
+    }
 
     res.status(201).json(ticket);
   } catch (error) {
@@ -65,6 +85,16 @@ exports.updateTicketStatus = async (req, res) => {
 
     ticket.status = status;
     await ticket.save();
+
+    // Notify ticket creator (tenant)
+    const tenant = await User.findById(ticket.tenant);
+    const tenantId = tenant?._id || ticket.tenant;
+
+    await Notification.create({
+      user: tenantId,
+      message: `Your ticket "${ticket.title}" status changed to ${status}`,
+      type: "ticket",
+    });
 
     res.json(ticket);
   } catch (error) {
