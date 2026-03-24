@@ -1,5 +1,7 @@
 const Transaction = require("../models/Transaction");
 const Property = require("../models/Property");
+const User = require("../models/User");
+const Notification = require("../models/Notification");
 
 // TENANT: Upload Payment
 exports.createTransaction = async (req, res) => {
@@ -22,6 +24,17 @@ exports.createTransaction = async (req, res) => {
       month,
       receipt_image,
     });
+
+    // Notify admin(s) about new payment upload
+    const admins = await User.find({ role: "admin" });
+    const notifPayload = admins.map((admin) => ({
+      user: admin._id,
+      message: `New payment uploaded by tenant ${req.user.id}: ${amount} for ${month}`,
+      type: "payment",
+    }));
+    if (notifPayload.length > 0) {
+      await Notification.insertMany(notifPayload);
+    }
 
     res.status(201).json(transaction);
   } catch (error) {
@@ -66,6 +79,13 @@ exports.verifyTransaction = async (req, res) => {
 
     transaction.is_verified = true;
     await transaction.save();
+
+    // Notify tenant that payment is verified
+    await Notification.create({
+      user: transaction.tenant,
+      message: `Your payment of ${transaction.amount} for ${transaction.month} is verified`,
+      type: "payment",
+    });
 
     res.json({ message: "Payment verified", transaction });
   } catch (error) {
